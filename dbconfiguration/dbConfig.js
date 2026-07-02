@@ -1,16 +1,17 @@
 const mongoose=require('mongoose');
+const dburl=process.env.DB_URL;
 
-function dbConnect(){
-  const dburl=process.env.DB_URL
-  if(!dburl){
-    console.log("Url is not defined")
-    return
-  }
-  mongoose.connect(dburl).then(()=>{
-     console.log("DB Connected")
-  }).catch((err)=>{
-     console.log("Error in DB",err)
-  })
+const connect=function dbConnect(){
+   if(!dburl){
+     console.log('Url is not defined');
+     return
+   }
+   return mongoose.connect(dburl).then(()=>{
+     console.log("DB CONNECTED");
+   }).catch((err)=>{
+     console.log('Error happened',err);
+   })
+
 }
 
-module.exports=dbConnect
+module.exports=connect;
