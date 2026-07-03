@@ -1,8 +1,8 @@
 const express=require('express');
 const router= express.Router();
-const registrationController=require("../../controllers/authControllers/RegistrationControllers");
+const {registrationController,verifyOtp}=require("../../controllers/authControllers/RegistrationControllers");
 
+router.post("/registration",registrationController);
+router.post("/verify-otp",verifyOtp);
 
-const registrationRoute=router.post("/registration",registrationController)
-
-module.exports=registrationRoute;
+module.exports=router;
