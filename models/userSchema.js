@@ -1,7 +1,6 @@
 const  mongoose=require('mongoose');
 const bcrypt=require('bcrypt');
 
-
 //database schema design 
 const userSchema=new mongoose.Schema({
    name:{
@@ -28,6 +27,12 @@ const userSchema=new mongoose.Schema({
      type:String,
    },
    otpExpires:{
+     type:Date
+   },
+   resetToken:{
+     type:String,
+   },
+   resetTokenExpires:{
      type:Date
    }
 })

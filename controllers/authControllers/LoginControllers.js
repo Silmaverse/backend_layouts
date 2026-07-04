@@ -1,29 +1,63 @@
-const { loginfieldValidate, generateAccesssToken } = require("../../helpers/loginUtils");
-const user=require("../../models/userSchema");
+const {
+  loginfieldValidate,
+  generateAccesssToken,
+  generateRefreshToken,
+  generateresetPassToken,
+} = require("../../helpers/loginUtils");
+const info = require("../../helpers/mailService");
+const user = require("../../models/userSchema");
 
+const loginControllers = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const msg = loginfieldValidate(email, password);
+    if (Object.keys(msg).length != 0) return res.status(400).send({ msg });
 
-const loginControllers=async(req,res)=>{
-   try{
+    const isUser = await user.findOne({
+      email,
+    });
+    if (!isUser)
+      return res.status(400).send({ message: "Invalid Credentials" });
+    const match = await isUser.comparePassword(password);
+    if (!match) return res.status(400).send({ message: "Invalid Credentials" });
+    const accessToken = generateAccesssToken({ email, id: isUser._id });
+    const refreshToken = generateRefreshToken({ email, id: isUser._id });
+    console.log(accessToken, refreshToken);
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken)
+      .cookie("refreshToken", refreshToken)
+      .send({ messgae: "Login Successfully" });
+  } catch (error) {
+    res.status(500).send({ message: error.messge });
+  }
+};
 
-       const {email ,password}=req.body; 
-       const msg=loginfieldValidate(email,password);
-       if(Object.keys(msg).length!=0) return res.status(400).send({msg});
-       
-       const isUser=await user.findOne({
-           email
-        })
-        if(!isUser) return res.status(400).send({message:"Invalid Credentials"});
-       const match=await isUser.comparePassword(password);
-       if(!match) return res.status(400).send({message:"Invalid Credentials"});
-       const accessToken=generateAccesssToken({email,id:isUser._id});
-       console.log(accessToken);
-       return res.status(200).send({messgae:"Login Successfully"})
-    }catch(error){
-       res.status(500).send({message:error.messge}); 
-    } 
+const forgetpass = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email)
+      return res.status(400).send({ message: "Please Enter your email" });
+    const resetToken = generateresetPassToken();
+    const isUser = await user.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          resetToken,
+          resetTokenExpires:new Date(Date.now()+10*60*1000)
+        },
+      },
+      {returnDocument:'after'}
+    );
+    if (!isUser)
+      return res.status(400).send({ message: "This email is not registered" });
+    const resetUrl=`${process.env.BASE_URl}/forget-pass?id=${user._id}&token=${resetToken}`
+    await info(email,resetUrl);
+    return res.status(200).send({msg:"A reset Link has been sent to your mail"})
 
-}
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-
-
-module.exports={loginControllers}
+module.exports = { loginControllers, forgetpass };

@@ -1,5 +1,5 @@
 const nodemailer=require('nodemailer');
-const otpmailTemp = require('./otpMailTemplate');
+const otpmailTemp = require('../templates/otpMailTemplate');
 
 
 // A transporter is an object that handles the connection to your email service and sends messages on your behal
