@@ -1,5 +1,5 @@
 const crypto=require('crypto');
-
+//registration helpers
 const fieldValidate=function fieldValidate(name,email,password){
     const errormsg={}
     if(!name){
@@ -36,4 +36,4 @@ const generateOtp=function generateOtp(){
 }
 
 
-module.exports={fieldValidate , validation ,generateOtp , otpVerifyValidate}
+module.exports={fieldValidate , validation ,generateOtp , otpVerifyValidate }

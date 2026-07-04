@@ -4,7 +4,7 @@ const {
   validation,
   generateOtp,
   otpVerifyValidate,
-} = require("../../helpers/utils");
+} = require("../../helpers/RegistrationUtils");
 const info = require("../../helpers/mailService");
 
 const registrationController = async (req, res) => {
@@ -30,7 +30,7 @@ const registrationController = async (req, res) => {
       email,
       password,
       otp,
-      otpExpires: new Date(Date.now() + 10 * 60 * 1000),
+      otpExpires: new Date(Date.now() + 5 * 60 * 1000),
     });
     await info(email, otp);
     res
@@ -58,11 +58,38 @@ const verifyOtp = async (req, res) => {
       { otp: null, isVerified: true },
       { returnDocument: "after" },
     );
-    if(!existingUser) return res.status(400).send({msg:"Invalid User"});
-    return res.status(200).send({msg:"Email verified successfully"})
+    if (!existingUser) return res.status(400).send({ msg: "Invalid User" });
+    return res.status(200).send({ msg: "Email verified successfully" });
   } catch (err) {
-     res.status(500).send({msg:err.message});
+    res.status(500).send({ msg: err.message });
   }
 };
 
-module.exports = { registrationController, verifyOtp };
+const resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if(!email) return res.status(400).send({message:"Please Enter your email"})
+    const normalizeemail=email.toLowerCase().trim()  
+    const otp = generateOtp()
+    const user = await usermodel.findOneAndUpdate({
+      email:normalizeemail,
+      isVerified: false,
+    },{
+       $set:{
+        otp,
+        otpExpires:new Date(Date.now()+5*60*1000) 
+       }
+    },{
+      returnDocument:'after'
+    });
+    if (!user) return res.status(400).send({ message: "Invalid User Request" });
+    await info(email,otp);
+    res.status(200).send({message:"Resend OTP to your mail"})
+    
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+module.exports = { registrationController, verifyOtp ,resendOTP};

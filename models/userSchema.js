@@ -1,6 +1,8 @@
 const  mongoose=require('mongoose');
 const bcrypt=require('bcrypt');
 
+
+//database schema design 
 const userSchema=new mongoose.Schema({
    name:{
     type:String,
@@ -30,6 +32,7 @@ const userSchema=new mongoose.Schema({
    }
 })
 
+//hashed password before save
 userSchema.pre('save',async function(){
   if (!this.isModified("password")) return;
 
@@ -39,6 +42,23 @@ userSchema.pre('save',async function(){
     console.log(err)
   }
 })
+
+
+//compare input password with hashed password for successfully login
+
+userSchema.methods.comparePassword=async function checkuser(password){
+  try{
+
+    const match=await bcrypt.compare(password,this.password);
+    return match;
+  }catch(err){
+     console.log(err)
+  }
+  
+}
+
+
+
 const user=mongoose.model('user',userSchema);
 
 
