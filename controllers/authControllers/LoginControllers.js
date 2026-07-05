@@ -28,7 +28,6 @@ const loginControllers = async (req, res) => {
     if (!match) return res.status(400).send({ message: "Invalid Credentials" });
     const accessToken = generateAccesssToken({ email, id: isUser._id });
     const refreshToken = generateRefreshToken({ email, id: isUser._id });
-    console.log(accessToken, refreshToken);
     return res
       .status(200)
       .cookie("accessToken", accessToken)
