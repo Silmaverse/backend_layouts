@@ -27,13 +27,13 @@ veify()
 
 //sending mail on behalf of my mail
 
-const info= async function sendMail(email,otp){
+const info= async function sendMail(email,subject,template){
     try{
        await transporter.sendMail({
          from:`"School Management" <${process.env.SMTP_USER}>`,
          to:email,
-         subject:"OTP VERIFICATION CODE",
-         html:otpmailTemp(otp)
+         subject,
+         html:template
 
        }) 
     }catch(err){

@@ -6,6 +6,7 @@ const {
   otpVerifyValidate,
 } = require("../../helpers/RegistrationUtils");
 const info = require("../../helpers/mailService");
+const otpmailTemp = require("../../templates/otpMailTemplate");
 
 const registrationController = async (req, res) => {
   try {
@@ -32,7 +33,7 @@ const registrationController = async (req, res) => {
       otp,
       otpExpires: new Date(Date.now() + 5 * 60 * 1000),
     });
-    await info(email, otp);
+    await info(email,"OTP Veification Code", otpmailTemp(otp));
     res
       .status(201)
       .json({ msg: "Registered initilized Please verify your email", user });
