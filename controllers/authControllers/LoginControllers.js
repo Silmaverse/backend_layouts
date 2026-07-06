@@ -1,10 +1,4 @@
-const {
-  loginfieldValidate,
-  generateAccesssToken,
-  generateRefreshToken,
-  generateresetPassToken,
-  passwordvalidation,
-} = require("../../helpers/loginUtils");
+const helpers = require("../../helpers/loginUtils");
 const info = require("../../helpers/mailService");
 const { token, hashtoken } = generateresetPassToken();
 const user = require("../../models/userSchema");
@@ -16,7 +10,7 @@ const resetPassTemplate = require("../../templates/resetPasswordLink");
 const loginControllers = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const msg = loginfieldValidate(email, password);
+    const msg = helpers.loginfieldValidate(email, password);
     if (Object.keys(msg).length != 0) return res.status(400).send({ msg });
 
     const isUser = await user.findOne({
@@ -26,12 +20,12 @@ const loginControllers = async (req, res) => {
       return res.status(400).send({ message: "Invalid Credentials" });
     const match = await isUser.comparePassword(password);
     if (!match) return res.status(400).send({ message: "Invalid Credentials" });
-    const accessToken = generateAccesssToken({ email, id: isUser._id });
-    const refreshToken = generateRefreshToken({ email, id: isUser._id });
+    const accessToken = helpers.generateAccesssToken({ email, id: isUser._id });
+    const refreshToken = helpers.generateRefreshToken({ email, id: isUser._id });
     return res
       .status(200)
-      .cookie("accessToken", accessToken)
-      .cookie("refreshToken", refreshToken)
+      .cookie("accessToken", accessToken,helpers.cookieConfig)
+      .cookie("refreshToken", refreshToken,helpers.cookieConfig)
       .send({ messgae: "Login Successfully" });
   } catch (error) {
     res.status(500).send({ message: error.messge });
@@ -81,7 +75,7 @@ const resetPassword = async (req, res) => {
     const hashtoken = crypto.createHash("sha256").update(token).digest("hex");
     if (!password)
       return res.status(400).send({ message: "Please Enter your Password" });
-    const passvalid=passwordvalidation(password);
+    const passvalid=helpers.passwordvalidation(password);
     if(Object.keys(passvalid).length!=0) return res.status(400).send({message:"Invalid Password"});
     const isUser = await user.findOne(
       {
@@ -101,4 +95,16 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { loginControllers, forgetpass, resetPassword };
+
+const logout= async (req,res)=>{
+  try{
+
+    res.clearCookie("accessToken",helpers.cookieConfig);
+    res.clearCookie("refreshToken",helpers.cookieConfig);
+    return res.status(200).json({message:"Logout Successfully"})
+  }catch(err){
+    return res.status(500).send({message:err.message})
+  }
+}
+
+module.exports = { loginControllers, forgetpass, resetPassword ,logout};

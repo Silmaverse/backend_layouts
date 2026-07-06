@@ -50,5 +50,6 @@ module.exports = {
   generateAccesssToken,
   generateRefreshToken,
   generateresetPassToken,
-  passwordvalidation
+  passwordvalidation,
+  cookieConfig
 };

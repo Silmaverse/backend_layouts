@@ -1,21 +1,16 @@
 const usermodel = require("../../models/userSchema");
-const {
-  fieldValidate,
-  validation,
-  generateOtp,
-  otpVerifyValidate,
-} = require("../../helpers/RegistrationUtils");
+const helpers = require("../../helpers/RegistrationUtils");
 const info = require("../../helpers/mailService");
 const otpmailTemp = require("../../templates/otpMailTemplate");
 
 const registrationController = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    const fieldrequire = fieldValidate(name, email, password);
+    const fieldrequire = helpers.fieldValidate(name, email, password);
     if (Object.keys(fieldrequire).length != 0) {
       return res.status(400).send({ fieldrequire });
     }
-    const fieldvalidation = validation(email, password);
+    const fieldvalidation = helpers.validation(email, password);
     if (Object.keys(fieldvalidation).length != 0) {
       return res.status(400).send({ fieldvalidation });
     }
@@ -24,7 +19,7 @@ const registrationController = async (req, res) => {
     if (isUser)
       return res.status(400).send({ messge: "This user already registered" });
 
-    const otp = generateOtp();
+    const otp = helpers.generateOtp();
 
     const user = await usermodel.create({
       name,
@@ -46,7 +41,7 @@ const registrationController = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const errmsg = otpVerifyValidate(email, otp);
+    const errmsg = helpers.otpVerifyValidate(email, otp);
     if (Object.keys(errmsg).length != 0)
       return res.status(400).send({ errmsg });
 
@@ -72,7 +67,7 @@ const resendOTP = async (req, res) => {
 
     if(!email) return res.status(400).send({message:"Please Enter your email"})
     const normalizeemail=email.toLowerCase().trim()  
-    const otp = generateOtp()
+    const otp = helpers.generateOtp()
     const user = await usermodel.findOneAndUpdate({
       email:normalizeemail,
       isVerified: false,
