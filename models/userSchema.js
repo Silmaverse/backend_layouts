@@ -17,7 +17,8 @@ const userSchema=new mongoose.Schema({
    } ,
    password:{
     type:String,
-    required:true
+    required:true,
+    select:false
    },
    isVerified:{
      type:Boolean,
@@ -25,17 +26,26 @@ const userSchema=new mongoose.Schema({
    },
    otp:{
      type:String,
+     select:false
    },
    otpExpires:{
-     type:Date
+     type:Date,
+     select:false
    },
    resetToken:{
      type:String,
+     select:false
    },
    resetTokenExpires:{
-     type:Date
-   }
-})
+     type:Date,
+     select:false
+   },
+  },
+  {
+    timestamps: true,
+  }
+)
+   
 
 //hashed password before save
 userSchema.pre('save',async function(){

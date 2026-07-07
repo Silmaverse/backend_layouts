@@ -1,5 +1,6 @@
 const helpers = require("../../helpers/loginUtils");
 const info = require("../../helpers/mailService");
+const {generateresetPassToken}=require("../../helpers/loginUtils");
 const { token, hashtoken } = generateresetPassToken();
 const user = require("../../models/userSchema");
 const crypto = require("crypto");
