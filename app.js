@@ -13,10 +13,9 @@ app.use(express.json());
 app.use(cookie_parser());
 app.use(routes);
 
-
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
   res.send("Nothing exist on this page");
-})
+});
 
 app.listen(port, () => {
   console.log(`Server is listening ${port}`);

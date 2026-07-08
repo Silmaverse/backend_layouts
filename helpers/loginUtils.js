@@ -45,10 +45,17 @@ const generateresetPassToken = function generateresetPassToken() {
   return { token, hashtoken };
 };
 
+
+const generateresetUrl=function generateresetUrl(id,token){
+  const resetUrl = `http://localhost:8000/${process.env.BASE_URL}/resetPassword?id=${isUser._id}&token=${token}`;
+  return resetUrl;
+}
+
 module.exports = {
   loginfieldValidate,
   generateAccesssToken,
   generateRefreshToken,
   generateresetPassToken,
   passwordvalidation,
+  generateresetUrl
 };

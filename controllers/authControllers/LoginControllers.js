@@ -1,5 +1,5 @@
 const helpers = require("../../helpers/loginUtils");
-const info = require("../../helpers/mailService");
+const initMail = require("../../helpers/mailService");
 const {generateresetPassToken}=require("../../helpers/loginUtils");
 const { token, hashtoken } = generateresetPassToken();
 const user = require("../../models/userSchema");
@@ -52,8 +52,8 @@ const forgetpass = async (req, res) => {
     );
     if (!isUser)
       return res.status(400).send({ message: "This email is not registered" });
-    const resetUrl = `http://localhost:8000/${process.env.BASE_URL}/resetPassword?id=${isUser._id}&token=${token}`;
-    await info(
+    const resetUrl = helpers.generateresetUrl(id,token);
+    await initMail(
       email,
       "Reset Password Link",
       resetPassTemplate(isUser.name, resetUrl),

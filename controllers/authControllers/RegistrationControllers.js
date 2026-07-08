@@ -1,6 +1,6 @@
 const usermodel = require("../../models/userSchema");
 const helpers = require("../../helpers/RegistrationUtils");
-const info = require("../../helpers/mailService");
+const initMail = require("../../helpers/mailService");
 const otpmailTemp = require("../../templates/otpMailTemplate");
 
 const registrationController = async (req, res) => {
@@ -28,7 +28,7 @@ const registrationController = async (req, res) => {
       otp,
       otpExpires: new Date(Date.now() + 5 * 60 * 1000),
     });
-    await info(email,"OTP Veification Code", otpmailTemp(otp));
+    await initMail(email,"OTP Veification Code", otpmailTemp(otp));
     res
       .status(201)
       .json({ msg: "Registered initilized Please verify your email", user });
@@ -80,7 +80,7 @@ const resendOTP = async (req, res) => {
       returnDocument:'after'
     });
     if (!user) return res.status(400).send({ message: "Invalid User Request" });
-    await info(email,otp);
+    await initMail(email,"Resend OTP to your mail",otpmailTemp(otp));
     res.status(200).send({message:"Resend OTP to your mail"})
     
   } catch (err) {
