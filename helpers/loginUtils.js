@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { func } = require("joi");
 //login helpers
 
 const loginfieldValidate = function loginfieldValidate(email, password) {
@@ -45,9 +46,14 @@ const generateresetPassToken = function generateresetPassToken() {
   return { token, hashtoken };
 };
 
+const verify =  function verify(token){
+   return jwt.verify(token,process.env.JWT_SECRET_KEY);
+
+}
 
 const generateresetUrl=function generateresetUrl(id,token){
-  const resetUrl = `http://localhost:8000/${process.env.BASE_URL}/resetPassword?id=${isUser._id}&token=${token}`;
+  const bakendUrl=process.env.BACKEND_URL|| "http://localhost:8000";
+  const resetUrl = `${bakendUrl}/${process.env.BASE_URL}/resetPassword?id=${id}&token=${token}`;
   return resetUrl;
 }
 
@@ -57,5 +63,7 @@ module.exports = {
   generateRefreshToken,
   generateresetPassToken,
   passwordvalidation,
-  generateresetUrl
+  generateresetUrl,
+  verify
+
 };

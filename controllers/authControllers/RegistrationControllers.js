@@ -28,7 +28,7 @@ const registrationController = async (req, res) => {
       otp,
       otpExpires: new Date(Date.now() + 5 * 60 * 1000),
     });
-    await initMail(email,"OTP Veification Code", otpmailTemp(otp));
+    await initMail(email, "OTP Veification Code", otpmailTemp(otp));
     res
       .status(201)
       .json({ msg: "Registered initilized Please verify your email", user });
@@ -65,27 +65,31 @@ const resendOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-    if(!email) return res.status(400).send({message:"Please Enter your email"})
-    const normalizeemail=email.toLowerCase().trim()  
-    const otp = helpers.generateOtp()
-    const user = await usermodel.findOneAndUpdate({
-      email:normalizeemail,
-      isVerified: false,
-    },{
-       $set:{
-        otp,
-        otpExpires:new Date(Date.now()+5*60*1000) 
-       }
-    },{
-      returnDocument:'after'
-    });
+    if (!email)
+      return res.status(400).send({ message: "Please Enter your email" });
+    const normalizeemail = email.toLowerCase().trim();
+    const otp = helpers.generateOtp();
+    const user = await usermodel.findOneAndUpdate(
+      {
+        email: normalizeemail,
+        isVerified: false,
+      },
+      {
+        $set: {
+          otp,
+          otpExpires: new Date(Date.now() + 5 * 60 * 1000),
+        },
+      },
+      {
+        returnDocument: "after",
+      },
+    );
     if (!user) return res.status(400).send({ message: "Invalid User Request" });
-    await initMail(email,"Resend OTP to your mail",otpmailTemp(otp));
-    res.status(200).send({message:"Resend OTP to your mail"})
-    
+    await initMail(email, "Resend OTP to your mail", otpmailTemp(otp));
+    res.status(200).send({ message: "Resend OTP to your mail" });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
 
-module.exports = { registrationController, verifyOtp ,resendOTP};
+module.exports = { registrationController, verifyOtp, resendOTP };

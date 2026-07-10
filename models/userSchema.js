@@ -15,6 +15,16 @@ const userSchema=new mongoose.Schema({
      trim:true,
      toLowerCase:true
    } ,
+   role:{
+     type:String,
+     enum:["student","teacher","admin","superadmin"],
+     default:'student' 
+   },
+   status:{
+     type:String,
+     enum:["pending","appproved","rejected"],
+     default:"pending"   
+   },
    password:{
     type:String,
     required:true,

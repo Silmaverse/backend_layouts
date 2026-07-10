@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 // A transporter is an object that handles the connection to your email service and sends messages on your behal
 // f. You create one transporter and reuse it for all your emails.email
 
-let transporter = null;
+let mailConfigCache = null;
 
 function hasSmtpCredentials() {
   return Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
@@ -14,12 +14,12 @@ function useEtherealFallback() {
 }
 
 async function mailConfig() {
-  if (transporter) {
-    return transporter;
+  if (mailConfigCache) {
+    return mailConfigCache;
   }
   if (hasSmtpCredentials()) {
     try {
-      transporter =nodemailer.createTransport({
+     const transporter =nodemailer.createTransport({
         host:process.env.SMTP_HOST|| "smtp.gmail.com",
         port:Number(process.env.SMTP_PORT) ||587,
         secure:process.env.SMTP_SECURE === "true",
@@ -29,13 +29,14 @@ async function mailConfig() {
         },
       });
       await transporter.verify();
-      console.log("Server is ready to take pur message");
-      return {
+      console.log("Server is ready to take our message");
+      mailConfigCache={
         transporter,
-        from:`School Management ${process.env.SMTP_USER}`   
-    }
+        from:`School Management <${process.env.SMTP_USER}>`
+      }
+      return mailConfigCache
     } catch (err) {
-      console.error("Verifiaction failed", err);
+      console.error("Verification failed", err);
       throw err;
     }
   }
@@ -49,7 +50,7 @@ async function mailConfig() {
         "Set SMTP_USER + SMTP_PASS in .env to deliver to real inboxes.\n",
       );
 
-      transporter = nodemailer.createTransport({
+      const transporter = nodemailer.createTransport({
         host: "smtp.ethereal.email",
         port: Number(process.env.SMTP_PORT)||587,
         secure: process.env.SMTP_SECURE==="true",
@@ -58,12 +59,16 @@ async function mailConfig() {
           pass: testaccount.pass,
         },
       });
-      return {
+
+      await transporter.verify();
+      mailConfigCache={
         transporter,
-        from:`School Management ${testaccount.user}`
-    };
+        from:`School Management <${testaccount.user}>`
+      }
+      return mailConfigCache;
+      
     } catch (err) {
-      console.log(err);
+      console.error(err);
       throw err;
     }
   }
@@ -76,19 +81,23 @@ async function mailConfig() {
 
 async function initMail(email,subject,template ) {
   try{
-      const  {transporter ,from} =await mailConfig(); 
-      if(transporter){
+      const  config =await mailConfig(); 
+      if(!config){
+        console.error("Mail is not configured properly");
+        return null;
+      }
+
+      const {transporter, from}=config
+      
        return  await transporter.sendMail({
-            from:from,
+            from,
             to: email,
             subject,
             html: template,
           });
-      }
-      console.error("Mail is not configured properly"); 
-      return null;
+      
     }catch(err){
-       console.log(err);
+       console.error(err);
        throw err;  
     }  
     
