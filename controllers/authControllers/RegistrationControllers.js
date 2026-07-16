@@ -25,6 +25,8 @@ const registrationController = async (req, res) => {
       name,
       email,
       password,
+      role:"student",
+      status:"approved",
       otp,
       otpExpires: new Date(Date.now() + 5 * 60 * 1000),
     });
@@ -92,4 +94,64 @@ const resendOTP = async (req, res) => {
   }
 };
 
-module.exports = { registrationController, verifyOtp, resendOTP };
+const registerStaff=async (req,res)=>{
+  try{
+
+    const {name,email,password,role}=req.body
+    const filederrors=helpers.fieldValidate(name,email,password);
+    if(Object.keys(filederrors).length!=0){
+      return res.status(400).json({
+        success:"false",
+        message:filederrors
+      })
+    }
+    const validationfileds=helpers.validation(email,password);
+    if(Object.keys(validationfileds).length!=0){
+      return res.status(400).json({
+        success:"false",
+        message:filederrors
+      })
+    }
+
+    const existUser= await usermodel.findOne({email});
+    if(existUser) return res.status(400).send({
+      success:false,
+      message:"Email is already regsitered"
+    })
+
+    if(!["teacher","admin"].includes(role)){
+      return res.status(400).send({
+        success:false,
+        message:"Invalid role request"
+      })
+    }
+    const otp = helpers.generateOtp();
+    const staff= await usermodel.create({
+      name,
+      email,
+      password,
+      role,
+      status:"pending",
+      otp,
+      otpExpires:new Date(Date.now()+5*60*1000)
+    });
+    
+    await initMail(email,"Send Otp verification Code",otpmailTemp(otp))
+    return res.status(201).json({
+      success:true,
+      message:"Appliaction submitted successfully , Awaiting superadmin approval",
+    })
+
+  }catch(error){
+    console.log("Error happened",error.message);
+    return res.status(500).json({
+      success:false,
+      message:"Internal server error"
+    })
+  }
+}
+
+
+
+
+module.exports = { registrationController, verifyOtp, resendOTP, registerStaff };
